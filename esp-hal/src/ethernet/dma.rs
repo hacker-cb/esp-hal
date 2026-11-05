@@ -25,6 +25,7 @@ pub const TDES0_LS: u32 = 1 << 29;
 pub const TDES0_FS: u32 = 1 << 28;
 /// TX checksum insertion control: 3 = IP Header checksum and payload checksum calculation
 /// and insertion are enabled, and pseudo-header checksum is calculated in hardware.
+#[allow(dead_code)]
 pub const TDES0_CIC_FULL: u32 = 3 << 22;
 /// TX second-address-chained mode (next descriptor pointer in TDES3).
 pub const TDES0_CHAINED: u32 = 1 << 20;
@@ -140,7 +141,10 @@ impl TDes {
     fn set_len_and_flags(&mut self, len: usize) {
         self.tdes1.set(len as u32 & RDES1_BUF1_SIZE_MASK);
         self.tdes0.set(
-            (self.tdes0.get() & TDES0_CHAINED) | TDES0_FS | TDES0_LS | TDES0_IC | TDES0_CIC_FULL,
+            // No hardware checksum insertion, carried until esp-rs/esp-hal#6192 is released.
+            // On ESP32 it reports IP Payload Error (TDES0 bit 12) for a large share of TCP
+            // frames, which then never arrive; ESP-IDF never enables it either.
+            (self.tdes0.get() & TDES0_CHAINED) | TDES0_FS | TDES0_LS | TDES0_IC,
         );
     }
 

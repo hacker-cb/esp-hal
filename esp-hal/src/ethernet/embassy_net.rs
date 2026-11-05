@@ -14,7 +14,6 @@ use core::task::Context;
 
 use embassy_net_driver_02::{
     Capabilities,
-    Checksum,
     Driver,
     HardwareAddress,
     LinkState,
@@ -153,13 +152,8 @@ impl<'d, P: Phy> Driver for Ethernet<'d, Async, P> {
         let mut caps = Capabilities::default();
         caps.max_transmission_unit = MTU;
         caps.max_burst_size = Some(self.tx.len());
-        // Checksums are offloaded to hardware in both directions (RX COE + TX
-        // insertion via the descriptor CIC bits), so smoltcp does neither.
-        caps.checksum.ipv4 = Checksum::None;
-        caps.checksum.tcp = Checksum::None;
-        caps.checksum.udp = Checksum::None;
-        caps.checksum.icmpv4 = Checksum::None;
-        caps.checksum.icmpv6 = Checksum::None;
+        // Checksums are computed in software (smoltcp's default, `Both`); the TX
+        // descriptors do not ask the MAC to insert them (see dma.rs).
         caps
     }
 
