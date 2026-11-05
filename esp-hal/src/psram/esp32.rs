@@ -131,7 +131,11 @@ pub(crate) mod utils {
     // PSRAM clock and cs IO should be configured based on hardware design.
     // For ESP32-WROVER or ESP32-WROVER-B module, the clock IO is IO17, the cs IO is
     // IO16, they are the default value for these two configs.
-    const D0WD_PSRAM_CLK_IO: u8 = 17;
+    //
+    // Carried for JXD-CPU-E1ETH until esp-rs/esp-hal#6639 is released: the discrete PSRAM
+    // shares the flash clock on GPIO6, because GPIO17 carries the RMII 50 MHz reference
+    // clock (EMAC_CLK_180). ESP-IDF's knob is CONFIG_D0WD_PSRAM_CLK_IO; 1.2.2 hardcodes 17.
+    const D0WD_PSRAM_CLK_IO: u8 = 6;
     const D0WD_PSRAM_CS_IO: u8 = 16;
 
     const D2WD_PSRAM_CLK_IO: u8 = 9; // Default value is 9
